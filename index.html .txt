@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bridge</title>
+<style>
+  body { 
+    margin: 0; 
+    font-family: Arial, sans-serif; 
+    background: #000; 
+    color: #fff; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    height: 100vh; 
+    flex-direction: column; 
+  }
+  button { 
+    padding: 1rem 2rem; 
+    font-size: 1.2rem; 
+    border: none; 
+    border-radius: 8px; 
+    background: #ff4081; 
+    color: #fff; 
+    cursor: pointer; 
+  }
+</style>
+</head>
+<body>
+<h1>Bridge App</h1>
+<button onclick="alert('Hello, cosmic traveler! 🌌')">Start</button>
+</body>
+</html>
