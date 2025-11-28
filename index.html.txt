@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bridge — Science + Spirituality</title>
+  <style>
+    :root{
+      --bg1:#03030a;
+      --bg2:#061025;
+      --accent:#7be7ff;
+      --glow:0 0 24px rgba(123,231,255,0.18);
+      --panel: rgba(255,255,255,0.03);
+      --muted: rgba(255,255,255,0.6);
+      --glass: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.009));
+      --card-radius:16px;
+      --max-width:880px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(12,32,80,0.14), transparent),
+                  radial-gradient(900px 500px at 90% 70%, rgba(150,40,220,0.06), transparent),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:#eaf6ff;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow:hidden;
+    }
+
+    /* starfield canvas sits behind everything */
+    #stars {
+      position:fixed;
+      inset:0;
+      z-index:0;
+    }
+
+    .app {
+      position:relative;
+      z-index:2;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+      box-sizing:border-box;
+    }
+
+    .card {
+      width:100%;
+      max-width:var(--max-width);
+      background:var(--glass);
+      border-radius:var(--card-radius);
+      padding:28px;
+      box-sizing:border-box;
+      box-shadow: var(--glow);
+      backdrop-filter: blur(8px) saturate(120%);
+      border: 1px solid rgba(255,255,255,0.04);
+      display:grid;
+      grid-template-columns: 1fr 260px;
+      gap:20px;
+      align-items:start;
+    }
+
+    .left {
+      padding-right:6px;
+    }
+
+    .title {
+      font-size:20px;
+      font-weight:600;
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .logo {
+      width:44px;
+      height:44px;
+      border-radius:10px;
+      display:inline-grid;
+      place-items:center;
+      background:linear-gradient(135deg,#04203b,#001228);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6), 0 0 18px rgba(123,231,255,0.06);
+      border:1px solid rgba(255,255,255,0.025);
+      color:var(--accent);
+      font-weight:700;
+      font-size:18px;
+    }
+
+    .subtitle {
+      color:var(--muted);
+      margin-top:6px;
+      font-size:13px;
+    }
+
+    .insight {
+      margin-top:18px;
+      padding:18px;
+      background:transparent;
+      border-radius:12px;
+      min-height:220px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      justify-content:center;
+    }
+
+    .piece {
+      opacity:0;
+      transform: translateY(12px);
+      transition: all 420ms cubic-bezier(.2,.9,.25,1);
+      will-change: transform, opacity;
+    }
+    .piece.show {
+      opacity:1;
+      transform: translateY(0);
+    }
+
+    .fact {
+      font-size:16px;
+      font-weight:600;
+      color:#e9ffff;
+      line-height:1.4;
+    }
+    .interpret {
+      font-size:15px;
+      color:#d8f7ff;
+    }
+    .question {
+      font-size:14px;
+      color:var(--muted);
+      font-style:italic;
+    }
+
+    .controls {
+      margin-top:18px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .btn {
+      background:linear-gradient(180deg, rgba(123,231,255,0.06), rgba(123,231,255,0.02));
+      color:var(--accent);
+      border: 1px solid rgba(123,231,255,0.12);
+      padding:12px 16px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      box-shadow: var(--glow);
+      transition: transform .12s ease, filter .12s ease;
+    }
+    .btn:active{ transform:translateY(1px) scale(.997); }
+    .primary {
+      appearance:none;
+      background:linear-gradient(90deg, rgba(123,231,255,0.12), rgba(120,140,255,0.06));
+      color:#caffff;
+      border:1px solid rgba(140,200,255,0.16);
+      padding:14px 22px;
+      font-size:16px;
+      font-weight:700;
+      border-radius:14px;
+      box-shadow: 0 8px 30px rgba(120,200,255,0.06);
+    }
+
+    .right {
+      padding-left:6px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .meta {
+      background:var(--panel);
+      padding:12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.02);
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .favorites {
+      max-height:360px;
+      overflow:auto;
+      padding:8px;
+    }
+    .favItem {
+      padding:8px;
+      border-radius:8px;
+      margin-bottom:8px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+      font-size:13px;
+      color:#e8fbff;
+      border:1px solid rgba(255,255,255,0.02);
+    }
+    .small {
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .controls .spacer { flex:1; }
+
+    footer{
+      margin-top:14px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* responsive */
+    @media (max-width:880px){
+      .card { grid-template-columns:1fr; }
+      .right { order:2; }
+    }
+
+    /* subtle pulse for the reveal button */
+    @keyframes pulse {
+      0% { box-shadow:0 0 30px rgba(123,231,255,0.06); transform:scale(1) }
+      50% { box-shadow:0 0 44px rgba(123,231,255,0.12); transform:scale(1.01) }
+      100% { box-shadow:0 0 30px rgba(123,231,255,0.06); transform:scale(1) }
+    }
+
+    .primary.pulse {
+      animation: pulse 2200ms infinite;
+    }
+
+    /* tiny hint */
+    .hint {
+      font-size:12px;
+      color:rgba(255,255,255,0.44);
+    }
+
+  </style>
+</head>
+<body>
+  <canvas id="stars" aria-hidden="true"></canvas>
+
+  <div class="app" role="application" aria-label="Bridge: science and spirituality">
+    <div class="card" role="region" aria-label="Main content">
+      <div class="left">
+        <div class="title">
+          <div class="logo" aria-hidden="true">Br</div>
+          <div>
+            <div>Bridge</div>
+            <div class="subtitle">Tiny bursts of science + spiritual reflection</div>
+          </div>
+        </div>
+
+        <div class="insight" id="insight" aria-live="polite">
+          <div class="piece fact" id="fact">Press “Reveal Insight” to receive one.</div>
+          <div class="piece interpret" id="interpret">A spiritual interpretation will appear here.</div>
+          <div class="piece question" id="question">A reflective question will appear here.</div>
+        </div>
+
+        <div class="controls" role="toolbar" aria-label="Controls">
+          <button id="reveal" class="btn primary pulse" title="Reveal insight (Space)"><span>✨ Reveal Insight</span></button>
+          <button id="another" class="btn" title="Shuffle insight">Shuffle</button>
+          <button id="save" class="btn" title="Save insight to favorites">Save</button>
+          <div class="spacer"></div>
+          <button id="copy" class="btn" title="Copy text">Copy</button>
+          <button id="clearFav" class="btn" title="Clear favorites">Clear Favorites</button>
+        </div>
+
+        <footer>
+          <div class="hint">Tip: press Space to reveal. Saved favorites persist locally in this browser.</div>
+        </footer>
+      </div>
+
+      <div class="right">
+        <div class="meta">
+          <strong>Recent insight</strong>
+          <div id="recentMeta" class="small" style="margin-top:8px">No insights yet.</div>
+        </div>
+
+        <div class="meta">
+          <strong>Favorites</strong>
+          <div class="favorites" id="favoritesList">
+            <div class="small" style="opacity:.7">No favorites yet. Save your favorite insights with the Save button.</div>
+          </div>
+        </div>
+
+        <div class="meta">
+          <strong>About</strong>
+          <div class="small" style="margin-top:8px">
+            Bridge pairs factual curiosity with reflective prompts. Expand the datasets in the code to make it yours.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* =======================
+   Content arrays — edit these to customize
+   ======================= */
+const FACTS = [
+  "There are more possible iterations of a game of chess than atoms in the observable universe (estimate: ~10^120).",
+  "Every element heavier than helium was forged inside stars or during explosive stellar events.",
+  "Our brain's neurons transmit signals via both electrical impulses and chemical neurotransmitters.",
+  "CRISPR is a gene-editing technique that can precisely alter DNA sequences in living cells.",
+  "The observable universe is about 93 billion light-years across.",
+  "Water is the only common substance on Earth that expands when it freezes, which is crucial for aquatic life.",
+  "Time passes more slowly near massive objects — this is gravitational time dilation from General Relativity.",
+  "Plants can communicate via chemical signals through the air and by electrical/chemical messages in root networks.",
+  "The human genome has roughly 3.1 billion base pairs and yet we share about 99.9% of it with other humans.",
+  "Photosynthesis converts sunlight into chemical energy with an efficiency that biology has optimized over billions of years."
+];
+
+const INTERPRETATIONS = [
+  "Growth and transformation often take place where energy meets structure — like stars forging new elements.",
+  "Even the smallest change in a system (like a gene edit) can ripple outward; intention matters.",
+  "Knowing that time is flexible under gravity invites humility about our place and perspective.",
+  "The web of life is communicative and cooperative, suggesting interconnectedness beneath apparent separateness.",
+  "Complexity can emerge from simple rules — small daily choices add up to surprising transformation.",
+  "Curiosity is an engine of meaning; the universe offers patterns waiting for attention.",
+  "Silence and stillness can be like fertile dark space where new insights are born.",
+  "Our inner wiring is both biological and story-based; reshaping habits changes both brain and narrative.",
+  "The cosmos is both indifferent and generous — its laws don’t care, but they allow life to flourish.",
+  "Observing with wonder changes the observer — noticing creates a kind of creative participation."
+];
+
+const QUESTIONS = [
+  "What small action today might change the shape of your future story?",
+  "Where do you feel most connected to something larger than yourself?",
+  "What belief of yours could benefit from a gentle revision based on new evidence?",
+  "If you had to explain wonder to someone who'd never seen the night sky, what would you say?",
+  "What pattern in your life repeats, and what might it be trying to teach you?",
+  "When have you experienced a tiny change that led to a big result?",
+  "What would you pay attention to today if you knew your perception shapes reality?",
+  "How do scientific facts change the way you interpret a spiritual feeling?",
+  "What part of you resists change, and what part quietly invites it?",
+  "Where can curiosity replace certainty in your next decision?"
+];
+
+/* =======================
+   App logic
+   ======================= */
+
+const el = id => document.getElementById(id);
+const factEl = el('fact');
+const interpretEl = el('interpret');
+const questionEl = el('question');
+const revealBtn = el('reveal');
+const anotherBtn = el('another');
+const saveBtn = el('save');
+const copyBtn = el('copy');
+const favoritesList = el('favoritesList');
+const recentMeta = el('recentMeta');
+const clearFavBtn = el('clearFav');
+
+let current = null;
+let favorites = JSON.parse(localStorage.getItem('bridge_favs') || "[]");
+
+/* utility: random pick */
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+/* format and show */
+function buildInsight(){
+  const fact = pick(FACTS);
+  const interpretation = pick(INTERPRETATIONS);
+  const question = pick(QUESTIONS);
+  return { fact, interpretation, question, ts: new Date().toISOString() };
+}
+
+function showInsight(obj, animate=true){
+  current = obj;
+  factEl.textContent = obj.fact;
+  interpretEl.textContent = obj.interpretation;
+  questionEl.textContent = obj.question;
+
+  // reveal pieces with slight stagger
+  const pieces = [factEl, interpretEl, questionEl];
+  pieces.forEach(p => p.classList.remove('show'));
+  if(!animate){
+    pieces.forEach(p => p.classList.add('show'));
+  } else {
+    pieces.forEach((p,i) => {
+      setTimeout(()=>p.classList.add('show'), 120 + i*120);
+    });
+  }
+
+  recentMeta.textContent = `Fact · ${new Date(obj.ts).toLocaleString()}`;
+}
+
+function revealAction(){
+  const ins = buildInsight();
+  showInsight(ins, true);
+  // small UI flourish
+  revealBtn.classList.remove('pulse');
+  setTimeout(()=>revealBtn.classList.add('pulse'), 900);
+}
+
+/* Save to favorites */
+function saveCurrent(){
+  if(!current) return;
+  favorites.unshift(current);
+  // keep a reasonable cap
+  if(favorites.length > 80) favorites = favorites.slice(0,80);
+  localStorage.setItem('bridge_favs', JSON.stringify(favorites));
+  renderFavorites();
+}
+
+/* render favorites list */
+function renderFavorites(){
+  favoritesList.innerHTML = '';
+  if(favorites.length === 0){
+    favoritesList.innerHTML = '<div class="small" style="opacity:.7">No favorites yet. Save your favorite insights with the Save button.</div>';
+    return;
+  }
+  favorites.forEach((f, idx) => {
+    const div = document.createElement('div');
+    div.className = 'favItem';
+    div.innerHTML = `<div style="font-weight:700">${f.fact}</div>
+                     <div style="font-size:13px;color:var(--muted);margin-top:6px">${f.interpretation}</div>
+                     <div style="font-size:12px;margin-top:8px;color:var(--muted)"><em>${f.question}</em></div>
+                     <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+                       <button class="btn" data-index="${idx}" data-action="use">Use</button>
+                       <button class="btn" data-index="${idx}" data-action="remove">Remove</button>
+                       <div style="flex:1"></div>
+                       <div class="small">${new Date(f.ts).toLocaleDateString()}</div>
+                     </div>`;
+    favoritesList.appendChild(div);
+  });
+}
+
+/* handle favorites click */
+favoritesList.addEventListener('click', (ev)=>{
+  const btn = ev.target.closest('button');
+  if(!btn) return;
+  const idx = Number(btn.dataset.index);
+  const action = btn.dataset.action;
+  if(action === 'use'){
+    const item = favorites[idx];
+    if(item) showInsight(item, false);
+  } else if(action === 'remove'){
+    favorites.splice(idx,1);
+    localStorage.setItem('bridge_favs', JSON.stringify(favorites));
+    renderFavorites();
+  }
+});
+
+/* copy to clipboard */
+async function copyCurrent(){
+  if(!current) return;
+  const text = `${current.fact}\n\nInterpretation: ${current.interpretation}\n\nReflection: ${current.question}`;
+  try {
+    await navigator.clipboard.writeText(text);
+    copyBtn.textContent = 'Copied ✓';
+    setTimeout(()=>copyBtn.textContent = 'Copy',1200);
+  } catch(e){
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    copyBtn.textContent = 'Copied ✓';
+    setTimeout(()=>copyBtn.textContent = 'Copy',1200);
+  }
+}
+
+/* clear favorites */
+clearFavBtn.addEventListener('click', ()=>{
+  if(!confirm('Clear all saved favorites?')) return;
+  favorites = [];
+  localStorage.removeItem('bridge_favs');
+  renderFavorites();
+});
+
+/* hook up buttons */
+revealBtn.addEventListener('click', revealAction);
+anotherBtn
